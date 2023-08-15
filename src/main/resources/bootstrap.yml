@@ -1,0 +1,7 @@
+spring:
+  cloud:
+    config:
+      uri: http://localhost:8888
+      name: config-service    # config-service의 application.yml 파일을 불러온다.
+#  profiles:
+#    active: dev
