@@ -7,11 +7,16 @@ import com.study.userservice.vo.ResponseOrder;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.env.Environment;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +29,11 @@ public class UserServiceImpl implements UserService{
     private final UserRepository userRepository;
 
     private final BCryptPasswordEncoder encoder;
+
+    private final RestTemplate restTemplate;
+
+    private final Environment env;
+
 
     @Override
     public UserDto createUser(UserDto userDto) {
@@ -59,9 +69,18 @@ public class UserServiceImpl implements UserService{
 
         UserDto userDto = mapper.map(getUserEntity, UserDto.class);
 
-        //임시로 넣어둠 아직 OrderService가 완성되지 않았음
-        List<ResponseOrder> orders = new ArrayList<>();
-        userDto.setOrders(orders);
+        // 호출하고자 하는 오더서비스의 주소 ( get으로 던지면 조회를 해온다. )
+        String orderUrl = String.format(env.getProperty("order.url"), userId);
+
+        // order-service에 있는 ResponseOrder와 같은 타입으로 받아준다.
+        // Using as rest template
+        ResponseEntity<List<ResponseOrder>> orderListResponse =
+                restTemplate.exchange(orderUrl, HttpMethod.GET, null,
+                        new ParameterizedTypeReference<List<ResponseOrder>>() {}
+                );
+
+        List<ResponseOrder> orderList = orderListResponse.getBody();
+        userDto.setOrders(orderList);
 
         return userDto;
     }
