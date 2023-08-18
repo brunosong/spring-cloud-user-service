@@ -5,7 +5,9 @@ import com.study.userservice.dto.UserDto;
 import com.study.userservice.jpa.UserEntity;
 import com.study.userservice.jpa.UserRepository;
 import com.study.userservice.vo.ResponseOrder;
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.core.ParameterizedTypeReference;
@@ -25,6 +27,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserServiceImpl implements UserService{
 
     private final UserRepository userRepository;
@@ -73,6 +76,7 @@ public class UserServiceImpl implements UserService{
         UserDto userDto = mapper.map(getUserEntity, UserDto.class);
 
         /* feign client 사용 */
+        /* feign exception handling */
         List<ResponseOrder> orderList = orderServiceClient.getOrders(userId);
         userDto.setOrders(orderList);
 
