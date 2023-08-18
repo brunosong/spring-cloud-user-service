@@ -1,5 +1,6 @@
 package com.study.userservice.service;
 
+import com.study.userservice.client.OrderServiceClient;
 import com.study.userservice.dto.UserDto;
 import com.study.userservice.jpa.UserEntity;
 import com.study.userservice.jpa.UserRepository;
@@ -33,6 +34,8 @@ public class UserServiceImpl implements UserService{
     private final RestTemplate restTemplate;
 
     private final Environment env;
+
+    private final OrderServiceClient orderServiceClient;
 
 
     @Override
@@ -69,17 +72,8 @@ public class UserServiceImpl implements UserService{
 
         UserDto userDto = mapper.map(getUserEntity, UserDto.class);
 
-        // 호출하고자 하는 오더서비스의 주소 ( get으로 던지면 조회를 해온다. )
-        String orderUrl = String.format(env.getProperty("order.url"), userId);
-
-        // order-service에 있는 ResponseOrder와 같은 타입으로 받아준다.
-        // Using as rest template
-        ResponseEntity<List<ResponseOrder>> orderListResponse =
-                restTemplate.exchange(orderUrl, HttpMethod.GET, null,
-                        new ParameterizedTypeReference<List<ResponseOrder>>() {}
-                );
-
-        List<ResponseOrder> orderList = orderListResponse.getBody();
+        /* feign client 사용 */
+        List<ResponseOrder> orderList = orderServiceClient.getOrders(userId);
         userDto.setOrders(orderList);
 
         return userDto;
