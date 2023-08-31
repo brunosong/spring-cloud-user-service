@@ -5,15 +5,13 @@ import com.study.userservice.dto.UserDto;
 import com.study.userservice.jpa.UserEntity;
 import com.study.userservice.jpa.UserRepository;
 import com.study.userservice.vo.ResponseOrder;
-import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
-import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreaker;
+import org.springframework.cloud.client.circuitbreaker.CircuitBreakerFactory;
 import org.springframework.core.env.Environment;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -28,7 +26,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class UserServiceImpl implements UserService{
+public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
 
@@ -39,6 +37,8 @@ public class UserServiceImpl implements UserService{
     private final Environment env;
 
     private final OrderServiceClient orderServiceClient;
+
+    private final CircuitBreakerFactory circuitBreakerFactory;
 
 
     @Override
@@ -77,7 +77,12 @@ public class UserServiceImpl implements UserService{
 
         /* feign client 사용 */
         /* feign exception handling */
-        List<ResponseOrder> orderList = orderServiceClient.getOrders(userId);
+        //List<ResponseOrder> orderList = orderServiceClient.getOrders(userId);
+
+        CircuitBreaker circuitbreaker = circuitBreakerFactory.create("circuitbreaker");
+        List<ResponseOrder> orderList = circuitbreaker.run(() -> orderServiceClient.getOrders(userId),
+                                                            throwable -> new ArrayList<>());
+
         userDto.setOrders(orderList);
 
         return userDto;

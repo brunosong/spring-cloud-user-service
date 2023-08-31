@@ -11,7 +11,7 @@ import java.util.List;
 @FeignClient(name = "order-service") //호출해야할 마이크로 서비스 이름을 지정
 public interface OrderServiceClient {
 
-    @GetMapping("/order-service/{userId}/orders_ng")
+    @GetMapping("/order-service/{userId}/orders")
     List<ResponseOrder> getOrders(@PathVariable String userId);
 
 }
