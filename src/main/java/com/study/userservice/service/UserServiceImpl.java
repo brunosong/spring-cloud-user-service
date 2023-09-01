@@ -79,10 +79,11 @@ public class UserServiceImpl implements UserService {
         /* feign exception handling */
         //List<ResponseOrder> orderList = orderServiceClient.getOrders(userId);
 
+        log.info("before call order microservice");
         CircuitBreaker circuitbreaker = circuitBreakerFactory.create("circuitbreaker");
         List<ResponseOrder> orderList = circuitbreaker.run(() -> orderServiceClient.getOrders(userId),
                                                             throwable -> new ArrayList<>());
-
+        log.info("After call order microservice");
         userDto.setOrders(orderList);
 
         return userDto;
