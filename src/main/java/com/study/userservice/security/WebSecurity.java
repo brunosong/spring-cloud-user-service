@@ -40,7 +40,7 @@ public class WebSecurity extends WebSecurityConfigurerAdapter {
 //                        .and()
 //                        .addFilter(getAuthenticationFilter());
         http.authorizeRequests().antMatchers("/**")
-                        .hasIpAddress("127.0.0.1")
+                        .hasIpAddress(env.getProperty("gateway.ip"))
                         .and()
                         .addFilter(getAuthenticationFilter());
 
