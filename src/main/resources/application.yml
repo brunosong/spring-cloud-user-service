@@ -4,12 +4,12 @@ server:
 spring:
   application:
     name: user-service
-  zipkin:
-    base-url: http://localhost:9411
-    enabled: true
-  sleuth:
-    sampler:
-      probability: 1.0
+#  zipkin:
+#    base-url: http://localhost:9411
+#    enabled: true
+#  sleuth:
+#    sampler:
+#      probability: 1.0
 
   h2:
     console:
@@ -30,13 +30,15 @@ eureka:
     register-with-eureka: true
     fetch-registry: true
     service-url:
-      defaultZone: http://localhost:8761/eureka
+      defaultZone: http://discovery-service:8761/eureka
   instance:
     instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
 
 
 greeting:
   message: Welcome to the Simple E-commerce
+
+
 logging:
   level:
     com.study.userservice.client: DEBUG
